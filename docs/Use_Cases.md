@@ -23,7 +23,10 @@ User Story: A researcher wants to expedite the process of collecting XANES spect
 ·  Chris wants to section his sample to see how the composition varies spatially. But one section go through all the spectrum will take too long, By using our package to short the time for each section, then he can do mapping
  
 project1:
+
 Create XANES and chemical environment  database: 
 user stories:
+
 By inputting large amount of computational XANES, one will have corresponding chemical environment. One to one relationship database will be formed.
+
 Having XANES spectrum(computational or experimental), and get the chemical environment directly rather than analysis the spectrum manually. 
