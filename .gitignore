@@ -1,0 +1,11 @@
+*.tiff
+*.jpg
+*.jpeg
+
+*.bmp
+*.pdf
+*.ipynb_checkpoints
+*.DS_Store
+*client_id.json
+*__pycache__
+*vscode
