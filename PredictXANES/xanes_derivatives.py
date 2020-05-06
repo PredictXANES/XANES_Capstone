@@ -2,6 +2,12 @@ import numpy as np
 
 
 def xanes_derivatives(mu_df, dx=0.80808080808):
+    '''
+    This function calculates and returns the first and second derivative of a series of XANES spectra.
+    Inputs:
+        mu_df = Pandas dataframe of averaged XANES spectra absorption values.
+        dx = distance between uniformly distributed energy values in XANES spectra. Defaulted to value provided in data.
+    '''
     if 'CN' in mu_df.columns:
         mu_df = mu_df.drop(labels='CN', axis=1)
     else:
