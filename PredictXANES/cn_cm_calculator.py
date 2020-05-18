@@ -16,8 +16,9 @@ def cn_cm_calculator(rootdir, k, r):
         r = The radius cutoff for determining the nearest neighbors to count for the coordination number.
 
     Outputs:
-        df = Dataframe that contains the Central Atom label, the Coordination Number, and the Coulomb Matrix for the
-        k neareast neighbors.
+        df1 = Dataframe that contains the Central Atom label and the Coulomb Matrix for the k neareast neighbors.
+        df2 = Dataframe that contains the Central Atom label, the coordination number, number of copper atoms, and
+        the number of tellurium atoms within r radius of the central atom.
     '''
 
     # Import list of the central copper atoms
@@ -27,12 +28,14 @@ def cn_cm_calculator(rootdir, k, r):
 
     overall_cm = []
     overall_cn = []
+    overall_num_cu = []
+    overall_num_te = []
 
     # Walk through root directory for the structure_data.csv for each system
     for subdir, dir, files in os.walk(rootdir):
         for file in files:
             if file == 'structure_data.csv':
-                central_cu = atoms_df['Central Atom'].iloc[i]
+                central_cu = atoms_df['Central_atom'].iloc[i]
 
                 data = pd.read_csv(os.path.join(subdir, file))  # Imports each system as a dataframe
 
@@ -42,7 +45,7 @@ def cn_cm_calculator(rootdir, k, r):
                 X[:, 1] = data['y']
                 X[:, 2] = data['z']
 
-                idx = data.loc[data['label'] == central_cu].index[0]  # Index value for the central attom
+                idx = data.loc[data['label'] == central_cu].index[0]  # Index value for the central atom
                 tree = KDTree(X, metric='euclidean')  # Train tree from x,y,z data and calculate euclidean distance
                 distances, indices = tree.query(X, k=k)  # Tree to calculate euclidean distance for 21 nearest neighbors
 
@@ -54,6 +57,14 @@ def cn_cm_calculator(rootdir, k, r):
 
                 # query tree for # of nearest neighbors within 3 A.
                 cn_tree = tree.query_radius(X, r=r, count_only=True)
+                ind = tree.query_radius(X, r=r)
+                ind = list(ind[idx])
+                ind.remove(idx)
+                cn_df = data.loc[ind]
+                num_cu1 = (cn_df.atom == 1.0).sum()
+                num_cu2 = (cn_df.atom == 2.0).sum()
+                num_cu = num_cu1 + num_cu2
+                num_te = (cn_df.atom == 3.0).sum()
                 cn = cn_tree[idx] - 1  # subtract self as a nearest neighbors for coordination number
 
                 cm = []  # Coulomb matrix
@@ -65,12 +76,17 @@ def cn_cm_calculator(rootdir, k, r):
 
                 overall_cm.append(cm)
                 overall_cn.append(cn)
+                overall_num_cu.append(num_cu)
+                overall_num_te.append(num_te)
 
                 i += 1
             else:
                 pass
-    df1 = pd.DataFrame(overall_cm)
-    df2 = pd.DataFrame(overall_cn, columns=['Coordination Number'])
-    df = pd.concat([atoms_df, df2, df1], axis=1, sort=False)
+    cm_df = pd.DataFrame(overall_cm)
+    cu_df = pd.DataFrame(overall_num_cu, columns=['Num Cu'])
+    te_df = pd.DataFrame(overall_num_te, columns=['Num Te'])
+    cn_df = pd.DataFrame(overall_cn, columns=['Coordination Number'])
+    df1 = pd.concat([atoms_df, cm_df], axis=1, sort=False)
+    df2 = pd.concat([atoms_df, cn_df, cu_df, te_df], axis=1, sort=False)
 
-    return df
+    return df1, df2
