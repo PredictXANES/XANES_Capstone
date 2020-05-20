@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def xanes_derivatives(mu_df, dx=0.80808080808):
     '''
     This function calculates and returns the first and second derivative of a series of XANES spectra.
@@ -8,26 +7,24 @@ def xanes_derivatives(mu_df, dx=0.80808080808):
         mu_df = Pandas dataframe of averaged XANES spectra absorption values.
         dx = distance between uniformly distributed energy values in XANES spectra. Defaulted to value provided in data.
     '''
-    if 'CN' in mu_df.columns:
-        mu_df = mu_df.drop(labels='CN', axis=1)
-    else:
-        pass
+    mu_labels = []
+    for nums in range(101):
+        if nums == 0:
+            pass
+        else:
+            mu_labels.append("Mu" + str(nums))
 
-    dmu1 = np.zeros([len(mu_df), len(mu_df.columns)])
-    dmu2 = np.zeros([len(mu_df), len(mu_df.columns)])
+    mu_df = mu_df[mu_labels]
+
+    dmu1 = np.zeros([len(mu_df), len(mu_df.columns)-1])
+    dmu2 = np.zeros([len(mu_df), np.shape(dmu1)[1]-1])
 
     for i in range(len(mu_df)):
-        for j in range(len(mu_df.columns)):
-            if j == len(mu_df.columns)-1:
-                pass
-            else:
-                dmu1[i, j] = (mu_df.iloc[i, j+1] - mu_df.iloc[i, j]) / dx
+        for j in range(np.shape(dmu1)[1]):
+            dmu1[i, j] = (mu_df.iloc[i, j+1] - mu_df.iloc[i, j]) / dx
 
     for i_ in range(len(mu_df)):
-        for j_ in range(len(mu_df.columns)):
-            if j_ == len(mu_df.columns)-1:
-                pass
-            else:
-                dmu2[i_, j_] = (dmu1[i_, j_+1] - dmu1[i_, j_]) / dx
+        for j_ in range(np.shape(dmu2)[1]):
+            dmu2[i_, j_] = (dmu1[i_, j_+1] - dmu1[i_, j_]) / dx
 
     return dmu1, dmu2
