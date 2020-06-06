@@ -62,13 +62,17 @@ def add_noise(df,std=0.015):
         y_noise = np.concatenate((y_noise,y2),axis=0)
     return y_noise.reshape(len(df.index),1000)
 
-def smooth_spectra(ndarray,windowSize=51, polynomial=2):
+def smooth_spectra(ndarray,windowSize=51, polynomial=2, datapoints=1000):
     smooth=np.array([])
+    xs = np.linspace(8970, 9050, datapoints)
+    energies= np.linspace(8970, 9050, len(ndarray[0]))
     for i in range(len(ndarray)):
         y2 = ndarray[i]
-        ysmooth = savgol_filter(y2, windowSize, polynomial)
+        s1 = UnivariateSpline(energies, y2, s=0)
+        after_smooth_contiuous_y = s1(xs) # generate a line with 'datapoints' data, the amount of data depend on the xs num the third parameter        
+        ysmooth = savgol_filter(after_smooth_contiuous_y, windowSize, polynomial)
         smooth = np.concatenate((smooth,ysmooth),axis=0)
-    after_smooth=smooth.reshape(len(ndarray),len(ndarray[0]))
+    after_smooth=smooth.reshape(len(ndarray),datapoints)
     return after_smooth
 
 def one_demension_get_N_evenly_spaced_elements(arr, numElems):
